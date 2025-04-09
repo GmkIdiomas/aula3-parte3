@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Complete the Body Part Sentences</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background-color: #f2f2f2;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .frase {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      font-size: 1.2em;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 200px;
+    }
+
+    button {
+      font-size: 1.1em;
+      padding: 8px 15px;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #mensagem-erro {
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    #resultados {
+      margin-top: 30px;
+      font-size: 1.2em;
+      text-align: left;
+    }
+
+    .frase-completa {
+      background-color: #e0f7fa;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="frase" id="frase-atual">I have ______ eyes.</div>
+    <input type="text" id="entrada" placeholder="Complete a frase" autofocus />
+    <button onclick="enviarPalavra()">Enviar</button>
+    <div id="mensagem-erro"></div>
+    <div id="resultados"></div>
+  </div>
+
+  <script>
+    const frases = [
+      "I have ______ eyes.",
+      "I have ______ arms.",
+      "I have a ______ nose.",
+      "I have ______ hair.",
+      "I have a ______ neck.",
+      "I have ______ legs.",
+      "I have ______ fingers.",
+      "I have ______ hair."
+    ];
+
+    const numberWords = [
+      "zero", "one", "two", "three", "four", "five",
+      "six", "seven", "eight", "nine", "ten",
+      "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+      "sixteen", "seventeen", "eighteen", "nineteen", "twenty"
+    ];
+
+    const frasesCompletas = [];
+    let indiceAtual = 0;
+
+    const fraseElemento = document.getElementById("frase-atual");
+    const entrada = document.getElementById("entrada");
+    const resultados = document.getElementById("resultados");
+    const mensagemErro = document.getElementById("mensagem-erro");
+
+    entrada.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        enviarPalavra();
+      }
+    });
+
+    function enviarPalavra() {
+      const palavra = entrada.value.trim().toLowerCase();
+      if (palavra === "") return;
+
+      // Verifica se tem número ou palavra numérica
+      const contemNumero = /\d/.test(palavra);
+      const contemNumeroPorExtenso = numberWords.some(word => palavra.includes(word));
+
+      if (contemNumero || contemNumeroPorExtenso) {
+        mensagemErro.textContent = "Não é permitido usar números.";
+        return;
+      }
+
+      mensagemErro.textContent = ""; // Limpa erro
+
+      const fraseOriginal = frases[indiceAtual];
+      const fraseCompleta = fraseOriginal.replace("______", palavra);
+      frasesCompletas.push(fraseCompleta);
+      entrada.value = "";
+
+      indiceAtual++;
+      if (indiceAtual < frases.length) {
+        fraseElemento.textContent = frases[indiceAtual];
+      } else {
+        mostrarFrases();
+        entrada.style.display = "none";
+        fraseElemento.textContent = "Atividade concluída! Tire um print da tela e envie ao seu professor(a).";
+        document.querySelector("button").style.display = "none";
+      }
+    }
+
+    function mostrarFrases() {
+      resultados.innerHTML = "<h3>Suas frases:</h3>";
+      frasesCompletas.forEach(frase => {
+        const div = document.createElement("div");
+        div.className = "frase-completa";
+        div.textContent = frase;
+        resultados.appendChild(div);
+      });
+    }
+  </script>
+
+</body>
+</html>
