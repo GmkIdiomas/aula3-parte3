@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tradução de Palavras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefefe;
+      text-align: center;
+      margin: 0;
+      padding: 5%;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #f4f4f4;
+      padding: 5vw;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 95%;
+      max-width: 600px;
+      min-height: 320px;
+      margin: 0 auto;
+    }
+    h2 {
+      font-size: 22px;
+    }
+    input {
+      padding: 10px;
+      width: 80%;
+      max-width: 300px;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 18px;
+      font-size: 15px;
+      margin: 5px;
+      cursor: pointer;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .correct { color: green; font-weight: bold; }
+    .incorrect { color: red; font-weight: bold; }
+    #mensagem {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+    #revisarLista {
+      margin-top: 30px;
+      text-align: left;
+      font-size: 16px;
+      padding: 10px;
+    }
+    .botoes-finais {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 id="portugues">Palavra em português</h2>
+    <input type="text" id="resposta" placeholder="Digite em inglês" />
+    <br />
+    <button onclick="verificarResposta()">Enviar</button>
+    <button id="ouvirBtn" onclick="ouvirPalavra()" style="display:none;">🔊 Ouvir frase</button>
+    <button onclick="naoLembro()">Não lembro</button>
+    <p id="mensagem"></p>
+  </div>
+
+  <div id="revisarLista"></div>
+
+  <script>
+    const palavrasOriginal = [
+      { pt: "Eu tenho olhos azuis", en: "I have blue eyes" },
+      { pt: "Ela tem pernas musculosas", en: "She has muscular legs" },
+      { pt: "Ele tem cabelo curto", en: "He has short hair" },
+      { pt: "Ela tem um nariz pequeno", en: "She has a small nose" },
+      { pt: "Elas tem cabelos longos", en: "They have long hair" },
+      { pt: "Ele tem olhos verdes", en: "He has green eyes" },
+      { pt: "Ela tem cabelo longo", en: "She has long hair" },
+      { pt: "Ele tem pernas finas", en: "He has thin legs" },
+      { pt: "Eu tenho dedos longos (das mãos)", en: "I have long fingers" },
+      { pt: "Ele tem pés pequenos", en: "He has small feet" }
+    ];
+
+    let palavras = [...palavrasOriginal];
+    let revisar = [];
+    let indice = 0;
+    let tentativas = 0;
+
+    function embaralhar(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    embaralhar(palavras);
+
+    function mostrarPalavra() {
+      document.getElementById("portugues").innerText = palavras[indice].pt;
+      document.getElementById("resposta").value = "";
+      document.getElementById("mensagem").innerText = "";
+      document.getElementById("resposta").focus();
+      document.getElementById("ouvirBtn").style.display = "none";
+    }
+
+    function verificarResposta() {
+      const resposta = document.getElementById("resposta").value.trim().toLowerCase();
+      const correta = palavras[indice].en.toLowerCase();
+
+      if (resposta === correta) {
+        document.getElementById("mensagem").innerHTML = "<span class='correct'>Correto!</span>";
+        document.getElementById("ouvirBtn").style.display = "inline-block";
+        setTimeout(() => {
+          indice++;
+          tentativas = 0;
+          if (indice < palavras.length) {
+            mostrarPalavra();
+          } else {
+            mostrarRevisar();
+          }
+        }, 1000);
+      } else {
+        tentativas++;
+        if (tentativas === 1) {
+          document.getElementById("mensagem").innerHTML = "<span class='incorrect'>Tente novamente.</span>";
+        } else {
+          document.getElementById("mensagem").innerHTML = `<span class='incorrect'>A palavra correta é: <strong>${correta}</strong></span>`;
+          revisar.push(palavras[indice]);
+          setTimeout(() => {
+            indice++;
+            tentativas = 0;
+            if (indice < palavras.length) {
+              mostrarPalavra();
+            } else {
+              mostrarRevisar();
+            }
+          }, 2000);
+        }
+      }
+    }
+
+    function ouvirPalavra() {
+      const utterance = new SpeechSynthesisUtterance(palavras[indice].en);
+      utterance.lang = "en-US";
+      speechSynthesis.speak(utterance);
+    }
+
+    function naoLembro() {
+      revisar.push(palavras[indice]);
+      indice++;
+      if (indice < palavras.length) {
+        mostrarPalavra();
+      } else {
+        mostrarRevisar();
+      }
+    }
+
+    function mostrarRevisar() {
+      let html = "<div id='telaFinal'>";
+      html += "<h2>Você completou todas as frases!</h2>";
+
+      if (revisar.length > 0) {
+        html += "<h3>Revisar:</h3><ul>";
+        revisar.forEach(p => {
+          html += `<li>${p.pt} → <strong>${p.en}</strong></li>`;
+        });
+        html += "</ul>";
+      } else {
+        html += "<p>Parabéns, você não marcou nenhuma frase para revisar!</p>";
+      }
+
+      html += `<p><strong>Envie o resultado p/ seu(a) professor(a)</strong></p>`;
+      html += "</div>";
+
+      html += `
+        <div class="botoes-finais">
+          <button onclick="estudarNovamente()">🔁 Estudar novamente</button>
+          ${revisar.length > 0 ? `<button onclick="revisarErros()">🔁 Revisar o que eu errei</button>` : ''}
+        </div>
+      `;
+
+      document.querySelector(".card").style.display = "none";
+      document.getElementById("revisarLista").innerHTML = html;
+    }
+
+    function estudarNovamente() {
+      palavras = [...palavrasOriginal];
+      revisar = [];
+      indice = 0;
+      tentativas = 0;
+      embaralhar(palavras);
+      document.querySelector(".card").style.display = "block";
+      document.getElementById("revisarLista").innerHTML = "";
+      mostrarPalavra();
+    }
+
+    function revisarErros() {
+      if (revisar.length > 0) {
+        palavras = [...revisar];
+        revisar = [];
+        indice = 0;
+        tentativas = 0;
+        embaralhar(palavras);
+        document.querySelector(".card").style.display = "block";
+        document.getElementById("revisarLista").innerHTML = "";
+        mostrarPalavra();
+      }
+    }
+
+    document.getElementById("resposta").addEventListener("input", function () {
+      const resposta = this.value.trim().toLowerCase();
+      const correta = palavras[indice].en.toLowerCase();
+      if (resposta === correta) {
+        document.getElementById("ouvirBtn").style.display = "inline-block";
+      }
+    });
+
+    document.getElementById("resposta").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        verificarResposta();
+      }
+    });
+
+    mostrarPalavra();
+  </script>
+</body>
+</html>
